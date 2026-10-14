@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Week</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: một cột cuộn dọc như phiếu giấy — Bài đọc → Read & answer → Matching → Kết quả */
+:root{
+  --bg:#eef4f0; --paper:#ffffff; --ink:#1d2b3a; --muted:#5d6f7d; --line:#cfdcd5;
+  --leaf:#2f8a5b; --leaf-soft:#dff1e6; --sun:#f2a93b; --sun-soft:#fdf0d9;
+  --navy:#111c37; --gold:#f5cf6b; --bad:#d9534f; --hl:#fff1b8;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1a17; --paper:#17251f; --ink:#e8f1ec; --muted:#9fb3a9; --line:#2c3f36;
+  --leaf:#5cc48c; --leaf-soft:#1d3a2b; --sun:#f5b955; --sun-soft:#3a2e17;
+  --bad:#ff7b76; --hl:#5a4a12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1a17; --paper:#17251f; --ink:#e8f1ec; --muted:#9fb3a9; --line:#2c3f36;
+  --leaf:#5cc48c; --leaf-soft:#1d3a2b; --sun:#f5b955; --sun-soft:#3a2e17;
+  --bad:#ff7b76; --hl:#5a4a12; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6}
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.strip{background:var(--navy);color:var(--gold);text-align:center;font:800 11px/1 var(--f-body);letter-spacing:2px;text-transform:uppercase;padding-block:7px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{background:var(--leaf);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar b{font:700 17px/1.2 var(--f-display)}
+.score{font:800 15px var(--f-body);background:rgba(255,255,255,.2);padding:4px 12px;border-radius:99px;font-variant-numeric:tabular-nums;white-space:nowrap}
+main{max-width:760px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+header.hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.unit{font:700 13px var(--f-body);letter-spacing:2px;text-transform:uppercase;color:var(--leaf)}
+h1{font:800 clamp(30px,7vw,44px)/1.05 var(--f-display);margin:0;text-wrap:balance}
+.cbadge{display:inline-block;background:var(--navy);color:var(--gold);font:800 12px var(--f-body);letter-spacing:1.5px;padding:5px 14px;border-radius:99px}
+.lead{color:var(--muted);margin:0;font-size:15px}
+section.card{background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:18px clamp(14px,4vw,24px);display:flex;flex-direction:column;gap:14px}
+.sh{display:flex;align-items:flex-start;gap:12px}
+.num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--sun);color:#1d2b3a;font:800 18px/34px var(--f-display);text-align:center}
+h2{font:800 22px/1.2 var(--f-display);margin:0}
+.vi{font-size:14px;color:var(--muted);margin:2px 0 0}
+.passage p{margin:0 0 8px}
+.passage .s{border-radius:4px;transition:background .3s}
+.passage .s.hl{background:var(--hl);box-shadow:0 0 0 3px var(--hl)}
+.w{border-bottom:2px dotted var(--leaf);cursor:pointer;font-weight:700;color:inherit;background:none;border-top:0;border-left:0;border-right:0;padding:0;font:inherit;font-weight:700}
+.w:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.tip{font-size:14px;background:var(--leaf-soft);border-radius:12px;padding:8px 12px;color:var(--ink);min-height:40px}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:800 15px var(--f-body);border:2px solid var(--leaf);background:var(--paper);color:var(--leaf);padding:8px 16px;border-radius:99px;cursor:pointer}
+.btn.solid{background:var(--leaf);color:#fff}
+.q{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:2px dashed var(--line)}
+.q:first-of-type{border-top:0;padding-top:0}
+.qt{font:700 18px/1.3 var(--f-display)}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:700 16px/1.35 var(--f-body);background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:10px 14px;cursor:pointer;display:flex;gap:10px;align-items:center}
+.opt .l{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sun-soft);font:800 14px/26px var(--f-body);text-align:center}
+.opt.ok{border-color:var(--leaf);background:var(--leaf-soft)}
+.opt.no{border-color:var(--bad);opacity:.55}
+.opt:disabled{cursor:default}
+.ans{display:none;background:var(--sun-soft);border-radius:12px;padding:8px 12px;font-weight:700}
+.ans.on{display:block}
+.ans small{display:block;font-weight:500;color:var(--muted)}
+.shake{animation:sh .4s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.match{position:relative;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);column-gap:clamp(36px,10vw,80px);row-gap:12px;align-items:center}
+.match .col{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+.mi{position:relative;z-index:1;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font:700 16px/1.35 var(--f-body);color:var(--ink);text-align:left;cursor:pointer;min-height:56px}
+.mi.left{font:800 18px var(--f-display)}
+.mi.sel{border-color:var(--sun);background:var(--sun-soft)}
+.mi.done{border-color:var(--leaf);background:var(--leaf-soft);cursor:default}
+svg.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+svg.wires path{fill:none;stroke:var(--leaf);stroke-width:4;stroke-linecap:round}
+.result{text-align:center;align-items:center}
+.result .big{font:800 52px/1 var(--f-display);color:var(--leaf);font-variant-numeric:tabular-nums}
+.result .cbadge{margin-top:4px}
+footer{text-align:center;font-size:12px;color:var(--muted);letter-spacing:1px}
+.tf{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:2px dashed var(--line)}
+.tf:first-child{border-top:0;padding-top:0}
+.tf .st{flex:1;min-width:0;font-weight:700}
+.tf .st small{display:block;font-weight:500;color:var(--muted);margin-top:4px}
+.tfb{display:flex;gap:8px;flex:none}
+.tfb button{width:52px;height:52px;border-radius:50%;border:3px solid var(--line);background:var(--paper);font:800 15px var(--f-body);cursor:pointer;color:var(--ink)}
+.tfb button.ok{border-color:var(--leaf);background:var(--leaf-soft)}
+.tfb button.no{border-color:var(--bad);opacity:.5}
+.tfb button:disabled{cursor:default}
+.bank{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:2px dashed var(--sun);border-radius:14px;background:var(--sun-soft)}
+.chip{font:800 15px var(--f-body);background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer}
+.chip.used{opacity:.35;text-decoration:line-through;cursor:default}
+.fl{padding-top:12px;border-top:2px dashed var(--line);font-weight:700;line-height:2.1}
+.fl:first-child{border-top:0;padding-top:0}
+.blank{display:inline-block;min-width:110px;padding:0 12px;border:0;border-bottom:3px solid var(--muted);background:var(--bg);color:var(--ink);font:800 16px/1.8 var(--f-body);border-radius:8px 8px 0 0;cursor:pointer;vertical-align:baseline}
+.blank.act{border-bottom-color:var(--sun);background:var(--sun-soft)}
+.blank.done{border-bottom-color:var(--leaf);background:var(--leaf-soft);color:var(--leaf);cursor:default}
+@media (max-width:420px){.tf{flex-direction:column;align-items:stretch}.tfb{justify-content:flex-end}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body style="margin:0">
+<div id="top">
+  <div class="strip" id="stripName"></div>
+  <div class="bar"><b>Unit 3 · Reading</b><span class="score" id="score">⭐ 0 / 9</span></div>
+</div>
+
+<main>
+  <header class="hero">
+    <span class="unit">Unit 3</span>
+    <h1>My Week</h1>
+    <span class="cbadge" id="badgeName"></span>
+    <p class="lead">Đọc bài, bấm vào <b>từ gạch chấm</b> để xem nghĩa, rồi làm 2 bài bên dưới.</p>
+  </header>
+
+  <section class="card">
+    <div class="sh"><span class="num">📖</span><div><h2>Read the text.</h2><p class="vi">Đọc bài văn. Bấm 🔊 để nghe đọc mẫu.</p></div></div>
+    <div class="tools" id="ttsTools" hidden>
+      <button class="btn solid" id="readAll">🔊 Nghe cả bài</button>
+      <button class="btn" id="stopRead">⏹ Dừng</button>
+    </div>
+    <div class="passage" id="passage">
+      <p><span class="s" id="s1">I often do <button class="w" data-w="housework">housework</button> to help my mom on Mondays.</span> <span class="s" id="s2">I clean my room and <button class="w" data-w="set the table">set the table</button> for dinner.</span> <span class="s" id="s3">It's important to help our families with <button class="w" data-w="chores">chores</button>.</span></p>
+      <p><span class="s" id="s4">I listen to music and dance in my room on Tuesdays.</span> <span class="s" id="s5">Music makes me feel happy, and dancing is so much fun!</span> <span class="s" id="s6">I love moving to my <button class="w" data-w="favorite">favorite</button> songs.</span></p>
+      <p><span class="s" id="s7">On Wednesdays, I go to school and learn with my friends.</span> <span class="s" id="s8">We learn new things in math, reading, and science.</span> <span class="s" id="s9">It's <button class="w" data-w="exciting">exciting</button> to learn and grow together with my <button class="w" data-w="classmates">classmates</button>.</span></p>
+      <p><span class="s" id="s10">On Thursdays, after school, I usually play with my friends at the park.</span> <span class="s" id="s11">We run, <button class="w" data-w="laugh">laugh</button>, and play on the swings and slides.</span> <span class="s" id="s12">It is a great time enjoying the <button class="w" data-w="fresh air">fresh air</button> and having fun together.</span></p>
+      <p><span class="s" id="s13">I have a special art class on each Friday.</span> <span class="s" id="s14">I paint a beautiful picture with <button class="w" data-w="bright colors">bright colors</button>.</span> <span class="s" id="s15">Art allows me to be <button class="w" data-w="creative">creative</button> and <button class="w" data-w="express myself">express myself</button> in different ways.</span></p>
+      <p><span class="s" id="s16">On Saturdays and Sundays, I have free time to <button class="w" data-w="relax">relax</button> and play.</span> <span class="s" id="s17">I read my favorite books, play games with my family, and <button class="w" data-w="go for a bike ride">go for a bike ride</button>.</span> <span class="s" id="s18"><button class="w" data-w="Weekends">Weekends</button> are a time to have fun and enjoy activities we love.</span></p>
+    </div>
+    <div class="tip" id="tip">💡 Bấm vào một từ có gạch chấm để xem nghĩa tiếng Việt.</div>
+  </section>
+
+  <section class="card" id="part1">
+    <div class="sh"><span class="num">1</span><div><h2>Answer these questions.</h2><p class="vi">Đọc và trả lời câu hỏi. Chọn câu trả lời đúng — đúng rồi sẽ hiện câu trả lời đầy đủ để em chép vào vở.</p></div></div>
+    <div id="qs"></div>
+  </section>
+
+  <section class="card" id="part2">
+    <div class="sh"><span class="num">2</span><div><h2>Fill in the blanks.</h2><p class="vi">Điền vào chỗ trống. Chạm vào ô trống (ô đang chọn có viền cam), rồi chạm vào từ đúng trong khung từ.</p></div></div>
+    <div class="bank" id="bank"></div>
+    <div id="fills"></div>
+  </section>
+
+  <section class="card result" id="result" hidden>
+    <h2>🎉 Well done!</h2>
+    <div class="big" id="rScore">9 / 9</div>
+    <p style="margin:0" id="rFirst"></p>
+    <p style="margin:0;font-weight:700" id="rMsg"></p>
+    <span class="cbadge" id="resultName"></span>
+    <button class="btn solid" id="again">🔁 Làm lại</button>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+
+<script>
+const CENTER = "QUEEN ENGLISH CENTER";
+const UNIT = "Unit 3 · My Week";
+const TOTAL = 9;
+document.getElementById("stripName").textContent = "👑 " + CENTER;
+document.getElementById("badgeName").textContent = "👑 " + CENTER;
+document.getElementById("resultName").textContent = "👑 " + CENTER + " · " + UNIT;
+document.getElementById("foot").textContent = CENTER + " · " + UNIT;
+
+const VOCAB = {
+  "housework":"việc nhà","set the table":"dọn bàn ăn","chores":"việc vặt trong nhà","favorite":"yêu thích",
+  "exciting":"thú vị, hào hứng","classmates":"bạn cùng lớp","laugh":"cười","fresh air":"không khí trong lành",
+  "bright colors":"màu sắc tươi sáng","creative":"sáng tạo","express myself":"thể hiện bản thân","relax":"thư giãn",
+  "go for a bike ride":"đi đạp xe dạo","Weekends":"những ngày cuối tuần"
+};
+const tip = document.getElementById("tip");
+const hasTTS = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+function say(t){ if(!hasTTS) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="en-US"; u.rate=.85; speechSynthesis.speak(u); }
+document.querySelectorAll(".w").forEach(b=>b.addEventListener("click",()=>{
+  const w=b.dataset.w; tip.innerHTML = "💡 <b>"+w+"</b> = "+VOCAB[w]; say(w);
+}));
+if(hasTTS){
+  document.getElementById("ttsTools").hidden=false;
+  document.getElementById("readAll").onclick=()=>say(document.getElementById("passage").innerText);
+  document.getElementById("stopRead").onclick=()=>speechSynthesis.cancel();
+}
+
+const QS = [
+  {q:"1. What do you do on Mondays to help your mom?", hl:["s1","s2"],
+   opts:["I clean my room and set the table for dinner.","I paint a beautiful picture.","I play with my friends at the park."], a:0,
+   full:"I clean my room and set the table for dinner.", vi:"Em dọn phòng và dọn bàn ăn tối."},
+  {q:"2. Why do you listen to music and dance on Tuesdays?", hl:["s5"],
+   opts:["Because I have a special art class.","Because music makes me feel happy, and dancing is so much fun.","Because I have free time to relax."], a:1,
+   full:"Because music makes me feel happy, and dancing is so much fun.", vi:"Vì âm nhạc làm em vui, và nhảy múa rất thú vị."},
+  {q:"3. What subjects do you learn at school on Wednesdays?", hl:["s8"],
+   opts:["Art and music.","Math, English, and P.E.","Math, reading, and science."], a:2,
+   full:"I learn math, reading, and science.", vi:"Em học toán, đọc và khoa học."},
+  {q:"4. What do you do on Thursdays after school?", hl:["s10"],
+   opts:["I usually play with my friends at the park.","I do housework.","I read my favorite books."], a:0,
+   full:"I usually play with my friends at the park.", vi:"Em thường chơi với bạn ở công viên."}
+];
+const BANK = ["Mondays","Tuesdays","Wednesdays","Thursdays","Friday","Saturdays and Sundays","Weekends"];
+const FILLS = [
+  {pre:"1. On ", post:", I go to school and learn with my friends.", a:"Wednesdays", hl:["s7"]},
+  {pre:"2. On ", post:", after school, I usually play with my friends at the park.", a:"Thursdays", hl:["s10"]},
+  {pre:"3. I have a special art class on each ", post:".", a:"Friday", hl:["s13"]},
+  {pre:"4. On ", post:", I have free time to relax and play.", a:"Saturdays and Sundays", hl:["s16"]},
+  {pre:"5. ", post:" are a time to have fun and enjoy activities we love.", a:"Weekends", hl:["s18"]}
+];
+
+let S;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function updScore(){document.getElementById("score").textContent="⭐ "+S.done+" / "+TOTAL}
+function shake(el){el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake")}
+function clearHL(){document.querySelectorAll(".s.hl").forEach(x=>x.classList.remove("hl"))}
+function hl(ids){clearHL();ids.forEach(id=>document.getElementById(id).classList.add("hl"))}
+
+function buildQs(){
+  const box=document.getElementById("qs"); box.innerHTML="";
+  QS.forEach(Q=>{
+    const d=document.createElement("div"); d.className="q";
+    d.innerHTML='<div class="qt">'+Q.q+'</div><div class="opts"></div><div class="ans"></div>';
+    const opts=d.querySelector(".opts"), ans=d.querySelector(".ans");
+    let tries=0;
+    (Q.fixed?(a=>a):shuffle)(Q.opts.map((t,i)=>({t,i}))).forEach((o,k)=>{
+      const b=document.createElement("button"); b.className="opt";
+      b.innerHTML='<span class="l">'+"abc"[k]+'</span><span>'+o.t+'</span>';
+      b.onclick=()=>{
+        if(o.i===Q.a){
+          b.classList.add("ok"); opts.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+          if(tries===0)S.first++; S.done++; updScore();
+          ans.innerHTML="✍️ "+Q.full+"<small>"+Q.vi+"</small>"; ans.classList.add("on");
+          hl(Q.hl); say(Q.full); check();
+        }else{
+          tries++; b.classList.add("no"); b.disabled=true; shake(b); hl(Q.hl);
+          tip.innerHTML="🔎 Gợi ý: đọc lại câu được <b>tô vàng</b> trong bài nhé!";
+        }
+      };
+      opts.appendChild(b);
+    });
+    box.appendChild(d);
+  });
+}
+
+function buildTF(){
+  const box=document.getElementById("fills"), bank=document.getElementById("bank");
+  box.innerHTML=""; bank.innerHTML=""; S.act=null; S.fTries={};
+  const blanks=[];
+  FILLS.forEach((F,i)=>{
+    const d=document.createElement("div"); d.className="fl";
+    const b=document.createElement("button"); b.className="blank"; b.textContent="?"; b.setAttribute("aria-label","Chỗ trống "+(i+1));
+    b.onclick=()=>{ if(!b.classList.contains("done")) setAct(i); };
+    d.append(F.pre,b,F.post); box.appendChild(d); blanks.push(b);
+  });
+  function setAct(i){ S.act=i; blanks.forEach((x,k)=>x.classList.toggle("act",k===i)); }
+  function nextAct(){ const k=blanks.findIndex(x=>!x.classList.contains("done")); if(k>=0) setAct(k); else S.act=null; }
+  BANK.forEach(w=>{
+    const c=document.createElement("button"); c.className="chip"; c.textContent=w;
+    c.onclick=()=>{
+      if(c.classList.contains("used")) return;
+      if(S.act===null){ shake(c); return; }
+      const i=S.act, F=FILLS[i], b=blanks[i];
+      if(w===F.a){
+        b.textContent=w; b.classList.remove("act"); b.classList.add("done"); c.classList.add("used");
+        if(!S.fTries[i]) S.first++; S.done++; updScore(); hl(F.hl);
+        say(F.pre.replace(/^\d+\.\s*/,"")+w+F.post); nextAct(); check();
+      }else{
+        S.fTries[i]=(S.fTries[i]||0)+1; shake(c); shake(b); hl(F.hl);
+        tip.innerHTML="🔎 Gợi ý: tìm câu được <b>tô vàng</b> trong bài để biết là ngày nào nhé!";
+      }
+    };
+    bank.appendChild(c);
+  });
+  setAct(0);
+}
+
+function check(){
+  if(S.done<TOTAL) return;
+  const r=document.getElementById("result"); r.hidden=false;
+  document.getElementById("rScore").textContent=TOTAL+" / "+TOTAL;
+  document.getElementById("rFirst").textContent="Đúng ngay lần đầu: "+S.first+" / "+TOTAL+" câu";
+  document.getElementById("rMsg").textContent =
+    S.first===TOTAL ? "Xuất sắc! Em đọc hiểu bài rất chắc. 🌟" :
+    S.first>=5 ? "Rất tốt! Em đã tìm đúng thông tin trong bài. 👏" :
+                 "Em đã cố gắng làm đến câu cuối cùng — thật đáng khen! 💪";
+  say("Well done!");
+  setTimeout(()=>r.scrollIntoView({behavior:"smooth",block:"center"}),400);
+}
+function start(){
+  S={done:0,first:0};
+  document.getElementById("result").hidden=true; clearHL(); updScore();
+  tip.innerHTML="💡 Bấm vào một từ có gạch chấm để xem nghĩa tiếng Việt.";
+  buildQs(); buildTF();
+}
+document.getElementById("again").onclick=()=>{start();scrollTo({top:0,behavior:"smooth"})};
+start();
+</script>
+
+</body>
+</html>
